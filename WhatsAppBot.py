@@ -31,7 +31,7 @@ def verify_token():
     return "Invalid verification token"
 
 @app.post("/")
-def hook():
+def hook(): 
     # Handle Webhook Subscriptions
     data = request.get_json()
     logging.info("Received webhook data: %s", data)
