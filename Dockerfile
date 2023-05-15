@@ -8,7 +8,7 @@ COPY ./requirements.txt /app/requirements.txt
 WORKDIR /app
 
 # install the dependencies and packages in the requirements file
-RUN python -m pip install --upgrade pip
+# RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # copy every content from the local file to the image
