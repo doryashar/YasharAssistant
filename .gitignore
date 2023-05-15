@@ -1,0 +1,7 @@
+.env
+models/vicuna-llama-cpp/ggml-vic13b-q4_0.bin
+models/vicuna-llama-cpp/__pycache__/model.cpython-310.pyc
+models/wizard-vicuna-runpod/__pycache__/model.cpython-310.pyc
+prompts/__pycache__/vicuna13b11.cpython-310.pyc
+conversations
+*.pyc
