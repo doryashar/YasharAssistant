@@ -107,7 +107,7 @@ def hook():
 
 
 if __name__ == "__main__":
-    app.run(port=80, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
 # if __name__ == "__main__":
 #     load_dotenv()
 #     messenger = WhatsApp(token=getenv("WHATSAPP_TOKEN"), phone_number_id=getenv("WHATSAPP_PHONE_NUMBER_ID"))
