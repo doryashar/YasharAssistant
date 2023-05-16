@@ -19,6 +19,9 @@ logging.basicConfig(
 # Initialize Flask App
 app = Flask(__name__)
 
+@app.route('/sayname')
+def sayname():
+    return '<h1>Hello Flask</h1>'
 
 @app.get("/")
 def verify_token():
