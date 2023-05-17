@@ -1,7 +1,14 @@
+import logging  
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+
 from os import getenv
 from heyoo import WhatsApp
 from dotenv import load_dotenv
-import logging  
 import os
 from flask import Flask, request, make_response
 from agent import Agent
@@ -25,11 +32,6 @@ import asyncio, httpx
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
     
 # Initialize Flask App
@@ -61,15 +63,13 @@ async def hook():
             mobile = messenger.get_mobile(data)
             name = messenger.get_name(data)
             message_type = messenger.get_message_type(data)
-            logging.info(
-                f"New Message; sender:{mobile} name:{name} type:{message_type}"
-            )
+            logging.info(f"New Message; sender:{mobile} name:{name} type:{message_type}")
             if message_type == "text":
                 message = messenger.get_message(data)
                 logging.info("Message: %s", message)
                 agent.get_chat(name, mobile)
                 reply_text = 'hi' #await agent.chat(mobile, message)
-                await messenger.send_message(reply_text, mobile)
+                messenger.send_message(reply_text, mobile)
 
             elif message_type == "interactive":
                 message_response = messenger.get_interactive_response(data)
