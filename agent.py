@@ -11,6 +11,7 @@ import prompts.vicuna13b11
 import importlib
 import os
 
+
 MODEL_NAME = 'wizard-vicuna-runpod' #'vicuna-llama-cpp'
 
 class Agent:
@@ -26,7 +27,7 @@ class Agent:
         os.makedirs('conversations', exist_ok=True)
 
     def download_model(self, model = MODEL_NAME, async_get=True):
-        logging.info(f'Getting model and tokenizer from: {model}')
+        logging.debug(f'Getting model and tokenizer from: {model}')
         
         self.model = importlib.import_module('models.' + model + '.model')
         model_tok = dict()
@@ -51,7 +52,7 @@ class Agent:
         return path, os.path.exists(path)
     
     def get_chat(self, user_name, nid=None):
-        logging.info(f'Getting chat path for: {user_name}, nid:{nid}')
+        logging.debug(f'Getting chat path for: {user_name}, nid:{nid}')
         if nid:
             path, exists = self.get_log_path(nid)
             if exists: return path
@@ -110,7 +111,7 @@ async def main():
     question2 = 'because i dont like single people'
     
     uid = agent.start_chat('Dor', 0)
-    logging.info('chat started')
+    logging.debug('chat started')
     await agent.chat(uid, question1)
     # await agent.chat(uid, question2)
     
