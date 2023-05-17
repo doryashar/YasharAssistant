@@ -40,7 +40,7 @@ class Agent:
         return model_tok, ret
     
     def process(self, X):
-        logging.info(f"processing {X}")
+        logging.debug(f"processing {X}")
         t_1 = time.time()
         res = self.model.process(X)
         t_2 = time.time()
@@ -68,10 +68,9 @@ class Agent:
             id += 1
         
         if not exists:
-            conversations = importlib.reload(prompts.vicuna13b11)
+            conversation = self.model.get_conversation()
             with open(path,'w') as fw:
-                # with open('prompts/vicuna13b1.1.py') as fr: fr.read()
-                    fw.write(user_name  + '\n' + conversations.convo.format(USER=user_name, ASSISTANT=self.name, STOP=self.stop))
+                    fw.write(user_name  + '\n' + conversation.format(USER=user_name, ASSISTANT=self.name, STOP=self.stop))
         return id
     
     async def chat(self, user_id: str, text: str) -> str:
@@ -98,7 +97,7 @@ class Agent:
         output = self.process(text)
         # output = output["choices"][0]["text"]
         
-        logging.info(text, output)
+        logging.debug((text, output))
         return output
 
 async def main():

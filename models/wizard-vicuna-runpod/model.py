@@ -1,6 +1,9 @@
 
 import os
 import runpod
+import importlib
+from . import prompt
+
 position = os.path.dirname(__file__)
 model_tokenizer = {'model' : None}
 
@@ -21,6 +24,10 @@ def process(prompt, *args, **kwargs):
     # Get the output of the endpoint run request, blocking until the endpoint run is complete.
     result = run_request.output()
     return result.get('result', '')
+
+def get_conversation():
+    conversations = importlib.reload(prompt)
+    return conversations.convo
 
 if __name__ == '__main__':
     print(process("USER: can you surf the web?\nASSISTANT(Ron):"))
