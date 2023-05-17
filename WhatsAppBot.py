@@ -66,9 +66,9 @@ async def hook():
             logging.info(f"New Message; sender:{mobile} name:{name} type:{message_type}")
             if message_type == "text":
                 message = messenger.get_message(data)
-                logging.info("Message: %s", message)
                 agent.get_chat(name, mobile)
                 reply_text = agent.chat(mobile, message) # Add await
+                logging.info("Message: %s, response %s", message, reply_text)
                 messenger.send_message(reply_text, mobile) # Add await 
 
             elif message_type == "interactive":
