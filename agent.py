@@ -1,6 +1,7 @@
 import asyncio
 import os
 import threading, time
+import logging
 # from whispercpp import Whisper
 
 # result = w.transcribe("myfile.mp3")
@@ -22,9 +23,10 @@ class Agent:
         self.name = name
         # self.whisper = Whisper('tiny')
         self.download_model(async_get=False)
+        os.makedirs('conversations', exist_ok=True)
 
     def download_model(self, model = MODEL_NAME, async_get=True):
-        print(f'Getting model and tokenizer from: {model}')
+        logging.info(f'Getting model and tokenizer from: {model}')
         
         self.model = importlib.import_module('models.' + model + '.model')
         model_tok = dict()
@@ -38,7 +40,7 @@ class Agent:
         return model_tok, ret
     
     def process(self, X):
-        print(f"processing {X}")
+        logging.info(f"processing {X}")
         t_1 = time.time()
         res = self.model.process(X)
         t_2 = time.time()
@@ -49,6 +51,7 @@ class Agent:
         return path, os.path.exists(path)
     
     def get_chat(self, user_name, nid=None):
+        logging.info(f'Getting chat path for: {user_name}, nid:{nid}')
         if nid:
             path, exists = self.get_log_path(nid)
             if exists: return path
@@ -95,7 +98,7 @@ class Agent:
         output = self.process(text)
         # output = output["choices"][0]["text"]
         
-        print(text, output)
+        logging.info(text, output)
         return output
 
 async def main():
@@ -108,7 +111,7 @@ async def main():
     question2 = 'because i dont like single people'
     
     uid = agent.start_chat('Dor', 0)
-    print('chat started')
+    logging.info('chat started')
     await agent.chat(uid, question1)
     # await agent.chat(uid, question2)
     
