@@ -4,11 +4,27 @@ from dotenv import load_dotenv
 import logging  
 import os
 from flask import Flask, request, make_response
+from agent import Agent
+import asyncio, httpx
+
+# # function converted to coroutine
+# async def get_xkcd_image(session):
+#     random = randint(0, 300)
+#     result = await session.get(f'http://xkcd.com/{random}/info.0.json') # dont wait for the response of API
+#     return result.json()['img']
+
+# # function converted to coroutine
+# async def get_multiple_images(number):
+#     async with httpx.AsyncClient() as session: # async client used for async functions
+#         tasks = [get_xkcd_image(session) for _ in range(number)]
+#         result = await asyncio.gather(*tasks, return_exceptions=True) # gather used to collect all coroutines and run them using loop and get the ordered response
+#     return result
+
 
 # Load .env file
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
-
+agent = Agent() 
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,9 +35,9 @@ logging.basicConfig(
 # Initialize Flask App
 app = Flask(__name__)
 
-@app.route('/sayname')
-def sayname():
-    return '<h1>Hello Flask</h1>'
+# @app.route('/sayname')
+# def sayname():
+#     return '<h1>Hello Flask</h1>'
 
 @app.get("/")
 def verify_token():
@@ -34,7 +50,7 @@ def verify_token():
     return "Invalid verification token"
 
 @app.post("/")
-def hook(): 
+async def hook(): 
     # Handle Webhook Subscriptions
     data = request.get_json()
     logging.info("Received webhook data: %s", data)
@@ -50,9 +66,10 @@ def hook():
             )
             if message_type == "text":
                 message = messenger.get_message(data)
-                name = messenger.get_name(data)
                 logging.info("Message: %s", message)
-                messenger.send_message(f"Hi {name}, nice to connect with you", mobile)
+                agent.get_chat(name, mobile)
+                reply_text = await agent.chat(mobile, message)
+                await messenger.send_message(reply_text, mobile)
 
             elif message_type == "interactive":
                 message_response = messenger.get_interactive_response(data)

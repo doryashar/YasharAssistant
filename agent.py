@@ -48,6 +48,12 @@ class Agent:
         path = os.path.abspath(f'conversations/{id}.log')
         return path, os.path.exists(path)
     
+    def get_chat(self, user_name, nid=None):
+        if nid:
+            path, exists = self.get_log_path(nid)
+            if exists: return path
+        return self.get_log_path(self.start_chat(user_name, nid))
+        
     def start_chat(self, user_name = 'USER', nid = None):
         id = nid if nid else Agent.max_id
         
