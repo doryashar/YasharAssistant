@@ -32,7 +32,7 @@ import asyncio, httpx
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
-
+queue = asyncio.Queue()
     
 # Initialize Flask App
 app = Flask(__name__)
@@ -67,7 +67,7 @@ async def hook():
             if message_type == "text":
                 message = messenger.get_message(data)
                 agent.get_chat(name, mobile)
-                reply_text = await agent.chat(mobile, message) 
+                # reply_text = await agent.chat(mobile, message) 
                 logging.info("Message: %s, response %s", message, reply_text)
                 # messenger.send_message(reply_text, mobile) # Add await 
 
