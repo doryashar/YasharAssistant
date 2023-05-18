@@ -13,7 +13,7 @@ import os
 from flask import Flask, request, make_response
 from agent import Agent
 import asyncio, httpx
-import threading
+import threading, queue
 
 # # function converted to coroutine
 # async def get_xkcd_image(session):
@@ -33,7 +33,7 @@ import threading
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
-queue = threading.Queue() #asyncio.Queue()
+queue = queue.Queue() #asyncio.Queue()
     
 # Initialize Flask App
 app = Flask(__name__)
