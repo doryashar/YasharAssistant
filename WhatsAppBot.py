@@ -114,9 +114,10 @@ async def handle_data(data):
                 logging.info(f"Message : {delivery}")
             else:
                 logging.info("No new message")
-# @app.route('/sayname')
-# def sayname():
-#     return '<h1>Hello Flask</h1>'
+@app.route('/sayname')
+def sayname():
+    asyncio.create_task(handle_items)
+    return '<h1>Hello Flask</h1>'
 
 @app.get("/")
 def verify_token():
@@ -138,7 +139,6 @@ async def hook():
 
 
 if __name__ == "__main__":
-    asyncio.create_task(handle_items)
     app.run(host='0.0.0.0', port=80, debug=True)
 # if __name__ == "__main__":
 #     load_dotenv()
