@@ -13,6 +13,7 @@ import os
 from flask import Flask, request, make_response
 from agent import Agent
 import asyncio, httpx
+import threading
 
 # # function converted to coroutine
 # async def get_xkcd_image(session):
@@ -32,7 +33,7 @@ import asyncio, httpx
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
-queue = asyncio.Queue()
+queue = threading.Queue() #asyncio.Queue()
     
 # Initialize Flask App
 app = Flask(__name__)
@@ -44,12 +45,21 @@ app = Flask(__name__)
 #         reply_text = await agent.chat(mobile, message) 
 #         messenger.send_message(reply_text, mobile) # Add await 
 #         queue.task_done()
-async def handle_items():
+
+# async def handle_items():
+#     # TODO run with celery or https://flask.palletsprojects.com/en/2.3.x/deploying/asgi/
+#     while True:
+#         data = await queue.get()
+#         handle_data(data)
+#         queue.task_done()
+
+def handle_items():
+#     # TODO run with celery or https://flask.palletsprojects.com/en/2.3.x/deploying/asgi/
     while True:
-        data = await queue.get()
+        data = queue.get()
         handle_data(data)
-        queue.task_done()
         
+      
 
 async def handle_data(data):
     changed_field = messenger.changed_field(data)
@@ -116,7 +126,8 @@ async def handle_data(data):
                 logging.info("No new message")
 @app.route('/sayname')
 def sayname():
-    asyncio.create_task(handle_items)
+    threading.Thread(target=handle_items).start()
+    # asyncio.create_task(handle_items)
     return '<h1>Hello Flask</h1>'
 
 @app.get("/")
@@ -134,7 +145,8 @@ async def hook():
     # Handle Webhook Subscriptions
     data = request.get_json()
     logging.info("Received webhook data: %s", data)
-    await queue.put(data)
+    # await 
+    queue.put(data)
     return "OK", 200
 
 
