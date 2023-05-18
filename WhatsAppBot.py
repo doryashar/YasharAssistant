@@ -61,7 +61,8 @@ def handle_items():
         
       
 
-async def handle_data(data):
+# async 
+def handle_data(data):
     changed_field = messenger.changed_field(data)
     if changed_field == "messages":
         new_message = messenger.is_message(data)
