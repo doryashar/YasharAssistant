@@ -4,7 +4,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-
+import asyncio
 from os import getenv
 from heyoo import WhatsApp
 from dotenv import load_dotenv
@@ -82,7 +82,9 @@ async def handle_data(data):
             if message_type == "text":
                 message = messenger.get_message(data)
                 logging.info("Message: %s", message)
-                reply_text = await agent.chat(mobile, message) 
+                
+                await asyncio.sleep(40)
+                reply_text = "OK" #agent.chat(mobile, message) 
                 messenger.send_message(reply_text, mobile) # Add await 
 
             elif message_type == "interactive":
@@ -156,7 +158,8 @@ async def hook(request: Request, bg_tasks: BackgroundTasks):
     data = await request.json()
     logging.info("Received webhook data: %s", data)
     bg_tasks.add_task(handle_data, data)
-    return {"OK"}
+    logging.info("Done")
+    return Response("OK", 200)
 
 
 
