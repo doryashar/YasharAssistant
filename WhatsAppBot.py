@@ -31,7 +31,8 @@ from agent import Agent
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
-      
+known_ids: set()
+
 async def handle_message(message, from_mobile, from_name):
     logging.info("Message: %s", message)
     reply_text = await agent.chat(from_mobile, message) 
@@ -50,7 +51,13 @@ async def handle_data(data):
             logging.info(f"New Message; sender:{mobile} name:{name} type:{message_type}")
             if message_type == "text":
                 message = messenger.get_message(data)
+                mid = data.get('entrypoint')[0]['id']
+                if mid in known_ids:
+                    logging.error('id already used')
+                    return
+                known_ids.add(mid)
                 await handle_message(message, mobile, name)
+                return
 
             elif message_type == "interactive":
                 message_response = messenger.get_interactive_response(data)

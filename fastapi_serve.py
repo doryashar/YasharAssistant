@@ -38,9 +38,8 @@ async def verify_token(
 @app.post("/")
 async def hook(request: Request, bg_tasks: BackgroundTasks): 
     data = await request.json()
-    logging.info("Received webhook data: %s", data)
+    logging.debug("Received webhook data: %s", data)
     bg_tasks.add_task(handle_data, data)
-    logging.info("Done")
     return "Success"
 
 
