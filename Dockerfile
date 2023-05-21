@@ -19,4 +19,4 @@ EXPOSE 80
 # configure the container to run in an executed manner
 ENTRYPOINT [ "python" ]
 
-CMD ["WhatsAppBot.py" ]
+CMD ["fastapi_serve.py" ]
