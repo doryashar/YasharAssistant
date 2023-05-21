@@ -32,7 +32,12 @@ load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
       
-
+async def handle_message(message, from_mobile, from_name):
+    logging.info("Message: %s", message)
+    reply_text = await agent.chat(from_mobile, message) 
+    logging.info(f"Sending {reply_text} to {from_mobile}")
+    messenger.send_message(reply_text, from_mobile) # Add await 
+    
 # async 
 async def handle_data(data):
     changed_field = messenger.changed_field(data)
@@ -45,12 +50,7 @@ async def handle_data(data):
             logging.info(f"New Message; sender:{mobile} name:{name} type:{message_type}")
             if message_type == "text":
                 message = messenger.get_message(data)
-                logging.info("Message: %s", message)
-                
-                await asyncio.sleep(3)
-                reply_text = "OK" #agent.chat(mobile, message) 
-                logging.info(f"Sending {reply_text} to {mobile}")
-                messenger.send_message(reply_text, mobile) # Add await 
+                await handle_message(message)
 
             elif message_type == "interactive":
                 message_response = messenger.get_interactive_response(data)

@@ -7,7 +7,7 @@ logging.basicConfig(
 from os import getenv
 from dotenv import load_dotenv
 import uvicorn
-from fastapi import FastAPI, BackgroundTasks, Request, Response
+from fastapi import FastAPI, BackgroundTasks, Request, Response, Query
 from WhatsAppBot import handle_data 
 # from pydantic import BaseModel
 
@@ -25,13 +25,13 @@ app = FastAPI()
 #     return '<h1>Hello Flask</h1>'
 
 @app.get("/")
-async def verify_token(req: Request):
-    request =  await req.json()
-    if request.args.get("hub.verify_token") == getenv('FLASK_VERIFY_TOKEN'):
+async def verify_token(
+    token: str = Query(alias="hub.verify_token"),
+    challenge: str = Query(alias="hub.challenge"),
+    ):
+    if token == getenv('FLASK_VERIFY_TOKEN'):
         logging.info("Verified webhook")
-        response = Response(request.args.get("hub.challenge"), 200)
-        response.mimetype = "text/plain"
-        return response
+        return challenge
     logging.error("Webhook Verification failed")
     return "Invalid verification token"
  
