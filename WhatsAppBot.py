@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import os
 from agent import Agent
 import uvicorn
-from fastapi import FastAPI, BackgroundTasks, Request
+from fastapi import FastAPI, BackgroundTasks, Request, Response
 from pydantic import BaseModel
 
 
@@ -140,16 +140,17 @@ def sayname():
     return '<h1>Hello Flask</h1>'
 
 
-# @app.get("/")
-# def verify_token(req):
-#     if request.args.get("hub.verify_token") == getenv('FLASK_VERIFY_TOKEN'):
-#         logging.info("Verified webhook")
-#         response = make_response(request.args.get("hub.challenge"), 200)
-#         response.mimetype = "text/plain"
-#         return response
-#     logging.error("Webhook Verification failed")
-#     return "Invalid verification token"
-
+@app.get("/")
+async def verify_token(req: Request):
+    request =  await req.json()
+    if request.args.get("hub.verify_token") == getenv('FLASK_VERIFY_TOKEN'):
+        logging.info("Verified webhook")
+        response = Response(request.args.get("hub.challenge"), 200)
+        response.mimetype = "text/plain"
+        return response
+    logging.error("Webhook Verification failed")
+    return "Invalid verification token"
+ 
 @app.post("/")
 async def hook(request: Request, bg_tasks: BackgroundTasks): 
     data = await request.json()
