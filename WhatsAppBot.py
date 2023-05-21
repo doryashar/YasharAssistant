@@ -159,7 +159,7 @@ async def hook(request: Request, bg_tasks: BackgroundTasks):
     logging.info("Received webhook data: %s", data)
     # bg_tasks.add_task(handle_data, data)
     logging.info("Done")
-    return Response("OK", 200)
+    return "Success"
 
 
 
