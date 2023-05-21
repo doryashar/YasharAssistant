@@ -31,7 +31,7 @@ from agent import Agent
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
-known_ids: set()
+known_ids = set()
 
 async def handle_message(message, from_mobile, from_name):
     logging.info("Message: %s", message)
