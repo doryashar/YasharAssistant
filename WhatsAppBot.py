@@ -1,5 +1,4 @@
-import logging  
-
+import logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -10,10 +9,17 @@ from os import getenv
 from heyoo import WhatsApp
 from dotenv import load_dotenv
 import os
-from flask import Flask, request, make_response
 from agent import Agent
-import asyncio, httpx
-import threading, queue
+import uvicorn
+from fastapi import FastAPI, BackgroundTasks, Request
+from pydantic import BaseModel
+
+
+# from flask import Flask, request, make_response
+# import asyncio, httpx
+# import threading, queue
+
+
 
 # # function converted to coroutine
 # async def get_xkcd_image(session):
@@ -33,10 +39,12 @@ import threading, queue
 load_dotenv()
 messenger = WhatsApp(os.getenv("WHATSAPP_TOKEN"), phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID"))
 agent = Agent() 
-queue = queue.Queue() #asyncio.Queue()
+
+# queue = queue.Queue() #asyncio.Queue()
     
-# Initialize Flask App
-app = Flask(__name__)
+# Initialize Serve App
+# app = Flask(__name__)
+app = FastAPI()
 
 # async def handle_items():
 #     while True:
@@ -53,16 +61,16 @@ app = Flask(__name__)
 #         handle_data(data)
 #         queue.task_done()
 
-def handle_items():
-#     # TODO run with celery or https://flask.palletsprojects.com/en/2.3.x/deploying/asgi/
-    while True:
-        data = queue.get()
-        handle_data(data)
-        
+
+
+class Base(BaseModel):
+    username: str
+    age: int
+      
       
 
 # async 
-def handle_data(data):
+async def handle_data(data):
     changed_field = messenger.changed_field(data)
     if changed_field == "messages":
         new_message = messenger.is_message(data)
@@ -74,7 +82,8 @@ def handle_data(data):
             if message_type == "text":
                 message = messenger.get_message(data)
                 logging.info("Message: %s", message)
-                # await queue.put((message, mobile, name))
+                reply_text = await agent.chat(mobile, message) 
+                messenger.send_message(reply_text, mobile) # Add await 
 
             elif message_type == "interactive":
                 message_response = messenger.get_interactive_response(data)
@@ -125,34 +134,40 @@ def handle_data(data):
                 logging.info(f"Message : {delivery}")
             else:
                 logging.info("No new message")
+                
 @app.route('/sayname')
 def sayname():
-    threading.Thread(target=handle_items).start()
-    # asyncio.create_task(handle_items)
     return '<h1>Hello Flask</h1>'
 
-@app.get("/")
-def verify_token():
-    if request.args.get("hub.verify_token") == getenv('FLASK_VERIFY_TOKEN'):
-        logging.info("Verified webhook")
-        response = make_response(request.args.get("hub.challenge"), 200)
-        response.mimetype = "text/plain"
-        return response
-    logging.error("Webhook Verification failed")
-    return "Invalid verification token"
+
+# @app.get("/")
+# def verify_token(req):
+#     if request.args.get("hub.verify_token") == getenv('FLASK_VERIFY_TOKEN'):
+#         logging.info("Verified webhook")
+#         response = make_response(request.args.get("hub.challenge"), 200)
+#         response.mimetype = "text/plain"
+#         return response
+#     logging.error("Webhook Verification failed")
+#     return "Invalid verification token"
 
 @app.post("/")
-async def hook(): 
-    # Handle Webhook Subscriptions
-    data = request.get_json()
+async def hook(request: Request, bg_tasks: BackgroundTasks): 
+    data = await request.json()
     logging.info("Received webhook data: %s", data)
-    # await 
-    queue.put(data)
-    return "OK", 200
+    bg_tasks.add_task(handle_data, data)
+    return {"OK"}
+
+
+
+# @app.on_event('startup')
+# async def app_startup():
+#     asyncio.create_task(runner())
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80, debug=True)
+    uvicorn.run(app, host='0.0.0.0', port=8070)
+    
+    
 # if __name__ == "__main__":
 #     load_dotenv()
 #     messenger = WhatsApp(token=getenv("WHATSAPP_TOKEN"), phone_number_id=getenv("WHATSAPP_PHONE_NUMBER_ID"))

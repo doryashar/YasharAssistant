@@ -1,5 +1,8 @@
 python-dotenv
-Flask[async]
+# Flask[async]
+fastapi
+pydantic
+uvicorn
 httpx
 heyoo
 runpod
