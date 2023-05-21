@@ -51,7 +51,7 @@ async def handle_data(data):
             logging.info(f"New Message; sender:{mobile} name:{name} type:{message_type}")
             if message_type == "text":
                 message = messenger.get_message(data)
-                mid = data.get('entrypoint')[0]['id']
+                mid = data.get('entry')[0]['id']
                 if mid in known_ids:
                     logging.error('id already used')
                     return
