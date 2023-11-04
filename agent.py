@@ -12,7 +12,7 @@ import importlib
 import os
 
 
-MODEL_NAME = 'wizard-vicuna-runpod' #'vicuna-llama-cpp'
+MODEL_NAME = 'wizard-vicuna-runpod' # 'vicuna-llama-cpp'
 
 class Agent:
     max_id = 0
