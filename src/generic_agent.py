@@ -13,7 +13,7 @@ import importlib
 import os
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 user_dict = {
     'user_name' : '{USER}',
@@ -135,7 +135,7 @@ class BaseAgent:
             logger.debug('Done, sending response: ' + response)
             return response, None
         except Exception as exp:
-            logger.exception(exp)
+            logger.exception(exp, exc_info=True)
             return None, None #f'Error: {exp}'
             
     async def process_text(self, text: str) -> str:
