@@ -50,17 +50,17 @@ async def handle_data(data):
             logging.info(f"New Message; sender:{mobile} name:{name} type:{message_type}")
             if message_type == "text":
                 message = messenger.get_message(data)
-                
+                msg_id = messenger.get_message_id(data)
                 json_data = {
                     "messaging_product": "whatsapp",
                     "status": "read",
-                    "message_id": messenger.get_message_id(data),
+                    "message_id": msg_id,
                 }
                 messenger.send_custom_json(json_data)
                 
-                mid = data.get('entry')[0]['id']
+                mid = msg_id #data.get('entry')[0]['id']
                 if mid in known_ids:
-                    logging.error('id already used')
+                    logging.error('id {} already used, message is {}, known_ids are {}'.format(mid, message, known_ids))
                     return
                 known_ids.add(mid)
                 await handle_message(message, mobile, name)
