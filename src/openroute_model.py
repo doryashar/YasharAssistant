@@ -26,7 +26,7 @@ class OpenRouteAgent(BaseAgent):
         super().__init__(agent_name)
         self.http_post_func = functools.partial(requests.post, headers=headers, timeout=10)
         self.prompt = '{history}\n{message}'
-    async def process_text(self, text: str, use_async=False) -> str:
+    async def process_text(self, text: str, use_async=True) -> str:
         """
         Asynchronously handles a message.
 
@@ -59,6 +59,7 @@ class OpenRouteAgent(BaseAgent):
             
         if response.status_code == 200:
             resp_data = json.loads(response.text)
+            logging.debug('Response: %s', resp_data)
             return resp_data["choices"][0]["message"]["content"]
         else:
             raise Exception(f"Error: {response.status_code} - {response.text}")

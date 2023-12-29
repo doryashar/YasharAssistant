@@ -12,7 +12,6 @@ import os
 from src.openroute_model import OpenRouteAgent as Agent
 
 
-
 # # function converted to coroutine
 # async def get_xkcd_image(session):
 #     random = randint(0, 300)
