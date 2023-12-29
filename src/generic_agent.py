@@ -98,8 +98,9 @@ class BaseAgent:
             
     async def chat(self, user_id: str, text: str, use_history=True, finish_callbacks=[], *args, **kwargs) -> str:
         if text[0] == '!':
-            if text[1:] in self.commands_functions:
-                func = self.commands_functions[text[1:]]
+            command = text.split()[0][1:]
+            if command in self.commands_functions:
+                func = self.commands_functions[command]
                 res = await func(user_id, text, use_history, finish_callbacks, *args, **kwargs)
                 return res
             else:
