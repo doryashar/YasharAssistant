@@ -35,6 +35,7 @@ known_ids = set()
 async def handle_message(message, from_mobile, from_name):
     logging.info("Message: %s", message)
     reply_text, reply_image = await agent.chat(from_mobile, message) 
+    logging.info("Reply: %s", reply_text)
     if not reply_text:
         return
     if len(reply_text) > 4000:

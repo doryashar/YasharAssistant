@@ -104,28 +104,35 @@ class BaseAgent:
                 if command in self.commands_functions:
                     func = self.commands_functions[command]
                     res = await func(user_id, text, use_history, finish_callbacks, *args, **kwargs)
+                    logger.debug('Command executed')
                     return res
                 else:
+                    logger.debug(f'Unknown command: {command}')
                     return 'Unknown command', None
             
             user = self.get_user(user_id)
             user_name = user.get('user_name', '{USER}')
-            
+            logger.debug(f'User: {user_name}')
             
             if use_history:
                 history = self.get_history(user_id)
             else:
                 history = ''
                 
+            logger.debug(f'Got history: {history}')
+                
             message = self.preprocess_text(user, text)
             prompt = self.prompt.format(message=message, user_name=user_name, history=history)
-            response = await self.process_text(prompt, *args, **kwargs)
             
+            logger.debug('Sending prompt: ' + prompt)
+            response = await self.process_text(prompt, *args, **kwargs)
+            logger.debug(f'Response: {response}')
             self.update_history(user_id, prompt, response, user_name)
             response, args, kwargs = self.postprocess_text(user, prompt, response, *args, **kwargs)
-            
+            logger.debug(f'calling finish_callbacks: {finish_callbacks}')
             for finish_callback in finish_callbacks:
                 args, kwargs = finish_callback(prompt=prompt, response=response, *args, **kwargs)
+            logger.debug('Done, sending response: ' + response)
             return response, None
         except Exception as exp:
             logger.exception(exp)
