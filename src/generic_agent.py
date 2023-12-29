@@ -13,7 +13,7 @@ import importlib
 import os
 
 logger = logging.getLogger()
-logger.setLevel(logger.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 user_dict = {
     'user_name' : '{USER}',
