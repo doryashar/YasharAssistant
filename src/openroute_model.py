@@ -8,7 +8,7 @@ import os
 import asyncio
 import functools
 import logging
-from src.generic_agent import BaseAgent
+from src.generic_agent import TranslatableAgent
 
 dotenv.load_dotenv()
 model_to_load = os.getenv("OPENROUTE_MODEL", "mistralai/mistral-7b-instruct")  # Optional
@@ -20,7 +20,7 @@ headers={
     "Authorization": "Bearer " + os.getenv("OPENROUTER_API_KEY"),
 }
 
-class OpenRouteAgent(BaseAgent):
+class OpenRouteAgent(TranslatableAgent):
     MODEL_NAME = model_to_load
     def __init__(self, agent_name = 'Rona') -> None:
         super().__init__(agent_name)

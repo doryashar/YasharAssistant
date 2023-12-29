@@ -36,3 +36,4 @@ urllib3==2.1.0
 webdriver-manager==4.0.1
 wsproto==1.2.0
 xvfbwrapper==0.2.9
+googletrans==3.1.0a0

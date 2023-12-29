@@ -1,6 +1,7 @@
 import asyncio
+import json
 import os
-import threading, time
+import time
 import logging
 # from whispercpp import Whisper
 
@@ -12,6 +13,12 @@ import importlib
 import os
 
 
+
+user_dict = {
+    'user_name' : '{USER}',
+}
+
+    
 class BaseAgent:
     MODEL_NAME = 'BaseModel'
     max_id = 0
@@ -20,15 +27,16 @@ class BaseAgent:
         self.name = agent_name
         os.makedirs('conversations', exist_ok=True)
         
-        self.user_names = dict()
-        if os.path.exists('conversations/user_names.txt'):
-            with open('conversations/user_names.txt', 'r') as fd:
-                for line in fd.readlines():
-                    user_id, name = line.strip().split(':')
-                    self.user_names[user_id] = name
+        self.users = dict()
+        if os.path.exists('conversations/users.json'):
+            with open('conversations/users.json', 'r') as fd:
+                self.users = json.load(fd)
         
         self.prompt = '{history}\n{user_name}:{message}'
         self.model = self.get_model(self.MODEL_NAME, async_get=False)
+        self.commands_functions = {
+            'reset_history': self.reset_history
+        }
         # self.stop = '</s>'
         # self.in_process = dict()
         # self.whisper = Whisper('tiny')
@@ -59,38 +67,48 @@ class BaseAgent:
                 fd.write(f"{user_name}\n{prompt}\n{response}")
                 fd.flush()
                 
-    def preprocess_text(self, text):
+    def preprocess_text(self, user, text):            
         return text
     
-    def postprocess_text(self, user_id, prompt, response, finish_callbacks, *args, **kwargs):
+    def postprocess_text(self, user, prompt, response, *args, **kwargs):
         return response, args, kwargs
     
-    def get_user_name(self, user_id):
-        return self.user_names.get(user_id, '{USER}')
+    def get_user(self, user_id):
+        if user_id not in self.users:
+            self.users[user_id] = user_dict.copy()
+        return self.users[user_id]
+            
     
-    def reset_history(self, user_id):
+    async def reset_history(self, user_id):
         conv_log_path, exists = self.get_log_path(user_id)
         if exists:
             os.remove(conv_log_path)
+        logging.debug(f'Reset history for {user_id}')
+        return 'History reset', None
             
     async def chat(self, user_id: str, text: str, use_history=True, finish_callbacks=[], *args, **kwargs) -> str:
-        if text == '!reset':
-            self.reset_history(user_id)
-            return 'History reset', None
+        if text[0] == '!':
+            if text[1:] in self.commands_functions:
+                func = self.commands_functions[text[1:]]
+                return await func(user_id, *args, **kwargs)
+            else:
+                return 'Unknown command', None
         
-        user_name = self.get_user_name(user_id)
+        user = self.get_user(user_id)
+        user_name = user.get('user_name', '{USER}')
+        
         
         if use_history:
             history = self.get_history(user_id)
         else:
             history = ''
             
-        message = self.preprocess_text(text)
+        message = self.preprocess_text(user, text)
         prompt = self.prompt.format(message=message, user_name=user_name, history=history)
         response = await self.process_text(prompt, *args, **kwargs)
         
         self.update_history(user_id, prompt, response, user_name)
-        response, args, kwargs = self.postprocess_text(user_id, prompt, response, finish_callbacks, *args, **kwargs)
+        response, args, kwargs = self.postprocess_text(user, prompt, response, *args, **kwargs)
         
         for finish_callback in finish_callbacks:
             args, kwargs = finish_callback(prompt=prompt, response=response, *args, **kwargs)
@@ -104,6 +122,34 @@ class BaseAgent:
         logging.debug((text, output, t2-t1))
         return output
 
+
+
+
+from googletrans import Translator
+class TranslatableAgent(BaseAgent):
+    def __init__(self, agent_name = '{ASSISTANT}') -> None:
+        super().__init__(agent_name)
+        self.translate_enabled = True
+        self.translator = Translator()
+
+    def preprocess_text(self, user, text):
+        text = super().preprocess_text(user, text)
+        if self.translate_enabled:
+            # logging.debug(f"Transalting {text}")
+            trans = self.translator.translate(text, dest='en')
+            text = trans.text
+            # if 'user_language' not in user:
+            user['user_language'] = trans.src
+        return text
+            
+    def postprocess_text(self, user, prompt, response, *args, **kwargs):
+        response, args, kwargs = super().postprocess_text(user, prompt, response, *args, **kwargs)
+        if self.translate_enabled:
+            trans = self.translator.translate(response, dest=user.get('user_language', 'en'))
+            text = trans.text
+        return text, args, kwargs
+    
+    
 async def main():
     logging.basicConfig(level=logging.DEBUG)
     agent = BaseAgent('Ronit')
