@@ -36,6 +36,7 @@ class BaseAgent:
         self.model = self.get_model(self.MODEL_NAME, async_get=False)
         self.commands_functions = {
             'reset_history': self.reset_history
+            'toggle' : self.toggle,
         }
         # self.stop = '</s>'
         # self.in_process = dict()
@@ -78,19 +79,27 @@ class BaseAgent:
             self.users[user_id] = user_dict.copy()
         return self.users[user_id]
             
-    
-    async def reset_history(self, user_id):
+    async def toggle(self, user_id, text, *args, **kwargs):
+        text_split = text.split()
+        if len(text_split) < 2:
+            return 'Error in command, need variables to toggle', None
+        for k in text_split[1:]:
+            attr = getattr(self,k, False)
+            setattr(self, k, not attr)            
+        return 'Toggled', None
+            
+    async def reset_history(self, user_id, *args, **kwargs):
         conv_log_path, exists = self.get_log_path(user_id)
         if exists:
             os.remove(conv_log_path)
-        logging.debug(f'Reset history for {user_id}')
+        logging.info(f'Reset history for {user_id}')
         return 'History reset', None
             
     async def chat(self, user_id: str, text: str, use_history=True, finish_callbacks=[], *args, **kwargs) -> str:
         if text[0] == '!':
             if text[1:] in self.commands_functions:
                 func = self.commands_functions[text[1:]]
-                return await func(user_id, *args, **kwargs)
+                return await func(user_id, text, use_history, finish_callbacks, *args, **kwargs)
             else:
                 return 'Unknown command', None
         
@@ -135,7 +144,7 @@ class TranslatableAgent(BaseAgent):
     def preprocess_text(self, user, text):
         text = super().preprocess_text(user, text)
         if self.translate_enabled:
-            # logging.debug(f"Transalting {text}")
+            logging.debug(f"Transalting {text}")
             trans = self.translator.translate(text, dest='en')
             text = trans.text
             # if 'user_language' not in user:
@@ -145,6 +154,7 @@ class TranslatableAgent(BaseAgent):
     def postprocess_text(self, user, prompt, response, *args, **kwargs):
         response, args, kwargs = super().postprocess_text(user, prompt, response, *args, **kwargs)
         if self.translate_enabled:
+            logging.debug(f"Transalting {response}")
             trans = self.translator.translate(response, dest=user.get('user_language', 'en'))
             text = trans.text
         return text, args, kwargs
