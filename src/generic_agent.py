@@ -21,10 +21,11 @@ class BaseAgent:
         os.makedirs('conversations', exist_ok=True)
         
         self.user_names = dict()
-        with open('user_names.txt', 'r') as fd:
-            for line in fd.readlines():
-                user_id, name = line.strip().split(':')
-                self.user_names[user_id] = name
+        if os.path.exists('conversations/user_names.txt'):
+            with open('conversations/user_names.txt', 'r') as fd:
+                for line in fd.readlines():
+                    user_id, name = line.strip().split(':')
+                    self.user_names[user_id] = name
         
         self.prompt = '{history}\n{user_name}:{message}'
         self.model = self.get_model(self.MODEL_NAME, async_get=False)
