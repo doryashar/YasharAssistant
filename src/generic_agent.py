@@ -81,6 +81,7 @@ class BaseAgent:
             
     async def toggle(self, user_id, text, *args, **kwargs):
         text_split = text.split()
+        logging.info(f'Toggling: {text_split[1:]}')
         if len(text_split) < 2:
             return 'Error in command, need variables to toggle', None
         for k in text_split[1:]:
@@ -99,7 +100,8 @@ class BaseAgent:
         if text[0] == '!':
             if text[1:] in self.commands_functions:
                 func = self.commands_functions[text[1:]]
-                return await func(user_id, text, use_history, finish_callbacks, *args, **kwargs)
+                res = await func(user_id, text, use_history, finish_callbacks, *args, **kwargs)
+                return res
             else:
                 return 'Unknown command', None
         
