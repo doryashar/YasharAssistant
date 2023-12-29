@@ -18,7 +18,6 @@ headers={
 }
 
 #TODO:
-# Use History
 # Translate
 class OpenRouteAgent(BaseAgent):
     MODEL_NAME = model_to_load
