@@ -68,7 +68,16 @@ class BaseAgent:
     def get_user_name(self, user_id):
         return self.user_names.get(user_id, '{USER}')
     
+    def reset_history(self, user_id):
+        conv_log_path, exists = self.get_log_path(user_id)
+        if exists:
+            os.remove(conv_log_path)
+            
     async def chat(self, user_id: str, text: str, use_history=True, finish_callbacks=[], *args, **kwargs) -> str:
+        if text == '!reset':
+            self.reset_history(user_id)
+            return 'History reset'
+        
         user_name = self.get_user_name(user_id)
         
         if use_history:
@@ -85,7 +94,7 @@ class BaseAgent:
         
         for finish_callback in finish_callbacks:
             args, kwargs = finish_callback(prompt=prompt, response=response, *args, **kwargs)
-        return response, args, kwargs
+        return response, None
             
     async def process_text(self, text: str) -> str:
         t1 = time.time()

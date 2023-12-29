@@ -34,7 +34,7 @@ known_ids = set()
 
 async def handle_message(message, from_mobile, from_name):
     logging.info("Message: %s", message)
-    reply_text = await agent.chat(from_mobile, message) 
+    reply_text, reply_image = await agent.chat(from_mobile, message) 
     logging.info(f"Sending {reply_text} to {from_mobile}")
     messenger.send_message(reply_text, from_mobile) # Add await 
     
