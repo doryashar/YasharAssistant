@@ -12,7 +12,8 @@ import logging
 import importlib
 import os
 
-
+logger = logging.getLogger()
+logger.setLevel(logger.DEBUG)
 
 user_dict = {
     'user_name' : '{USER}',
@@ -44,7 +45,7 @@ class BaseAgent:
         # self.download_model(async_get=False)
 
     def get_model(self, model = MODEL_NAME, async_get=True):
-        # logging.debug(f'Getting model and tokenizer from: {model}')
+        # logger.debug(f'Getting model and tokenizer from: {model}')
         pass
 
     def get_log_path(self, id) -> tuple[str, bool]:
@@ -81,7 +82,7 @@ class BaseAgent:
             
     async def toggle(self, user_id, text, *args, **kwargs):
         text_split = text.split()
-        logging.info(f'Toggling: {text_split[1:]}')
+        logger.info(f'Toggling: {text_split[1:]}')
         if len(text_split) < 2:
             return 'Error in command, need variables to toggle', None
         for k in text_split[1:]:
@@ -93,7 +94,7 @@ class BaseAgent:
         conv_log_path, exists = self.get_log_path(user_id)
         if exists:
             os.remove(conv_log_path)
-        logging.info(f'Reset history for {user_id}')
+        logger.info(f'Reset history for {user_id}')
         return 'History reset', None
             
     async def chat(self, user_id: str, text: str, use_history=True, finish_callbacks=[], *args, **kwargs) -> str:
@@ -131,7 +132,7 @@ class BaseAgent:
         time.sleep(1)
         output = "RESPONSE"
         t2 = time.time()
-        logging.debug((text, output, t2-t1))
+        logger.debug((text, output, t2-t1))
         return output
 
 
@@ -147,8 +148,9 @@ class TranslatableAgent(BaseAgent):
     def preprocess_text(self, user, text):
         text = super().preprocess_text(user, text)
         if self.translate_enabled:
-            logging.debug(f"Transalting {text}")
+            logger.debug(f"Start Translating {text}")
             trans = self.translator.translate(text, dest='en')
+            logger.debug(f"Done Translating {text}")
             text = trans.text
             # if 'user_language' not in user:
             user['user_language'] = trans.src
@@ -157,14 +159,15 @@ class TranslatableAgent(BaseAgent):
     def postprocess_text(self, user, prompt, response, *args, **kwargs):
         response, args, kwargs = super().postprocess_text(user, prompt, response, *args, **kwargs)
         if self.translate_enabled:
-            logging.debug(f"Transalting {response}")
+            logger.debug(f"Start Translating {response}")
             trans = self.translator.translate(response, dest=user.get('user_language', 'en'))
+            logger.debug(f"Done Translating {response}")
             text = trans.text
         return text, args, kwargs
     
     
 async def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logger.basicConfig(level=logger.DEBUG)
     agent = BaseAgent('Ronit')
     
     # question = "Name the planets in the solar system?"
@@ -174,9 +177,9 @@ async def main():
     question2 = 'because i dont like single people'
     
     # uid = agent.start_chat('Dor', 0)
-    # logging.debug('chat started')
+    # logger.debug('chat started')
     res = await agent.chat('0', question1)
-    logging.info(f"\nQ: {question1}\nResponse: {res}")
+    logger.info(f"\nQ: {question1}\nResponse: {res}")
     # await agent.chat(uid, question2)
     
 if __name__ == '__main__':
