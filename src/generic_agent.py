@@ -76,7 +76,7 @@ class BaseAgent:
     async def chat(self, user_id: str, text: str, use_history=True, finish_callbacks=[], *args, **kwargs) -> str:
         if text == '!reset':
             self.reset_history(user_id)
-            return 'History reset'
+            return 'History reset', None
         
         user_name = self.get_user_name(user_id)
         
