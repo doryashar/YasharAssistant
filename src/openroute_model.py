@@ -1,3 +1,6 @@
+#TODO:
+# Translate
+
 import requests
 import json
 import dotenv
@@ -17,8 +20,6 @@ headers={
     "Authorization": "Bearer " + os.getenv("OPENROUTER_API_KEY"),
 }
 
-#TODO:
-# Translate
 class OpenRouteAgent(BaseAgent):
     MODEL_NAME = model_to_load
     def __init__(self, agent_name = 'Rona') -> None:
