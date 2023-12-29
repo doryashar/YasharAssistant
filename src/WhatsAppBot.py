@@ -35,8 +35,12 @@ known_ids = set()
 async def handle_message(message, from_mobile, from_name):
     logging.info("Message: %s", message)
     reply_text, reply_image = await agent.chat(from_mobile, message) 
-    logging.info(f"Sending {reply_text} to {from_mobile}")
-    messenger.send_message(reply_text, from_mobile) # Add await 
+    if len(reply_text) > 4000:
+        for i in range(0, len(reply_text), 4000):
+            logging.info(f"Sending {reply_text} to {from_mobile}")
+            messenger.send_message(reply_text[i:i+4000], from_mobile)
+            await asyncio.sleep(2)
+    
     
 # async 
 async def handle_data(data):
