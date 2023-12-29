@@ -8,7 +8,7 @@ from os import getenv
 from dotenv import load_dotenv
 import uvicorn
 from fastapi import FastAPI, BackgroundTasks, Request, Response, Query
-from WhatsAppBot import handle_data 
+from src.WhatsAppBot import handle_data 
 # from pydantic import BaseModel
 
 # class Base(BaseModel):
@@ -17,8 +17,6 @@ from WhatsAppBot import handle_data
 
 load_dotenv()
 app = FastAPI()
-
-
 
 # @app.route('/sayname')
 # def sayname():

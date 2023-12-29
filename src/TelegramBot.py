@@ -17,7 +17,7 @@ import os
 from dotenv import load_dotenv
 import logging
 from typing import Dict
-from agent import Agent
+from src.agent import Agent
 from telegram import __version__ as TG_VER
 
 try:

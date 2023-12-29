@@ -9,7 +9,7 @@ from os import getenv
 from heyoo import WhatsApp
 from dotenv import load_dotenv
 import os
-from agent import Agent
+from src.openroute_model import OpenRouteAgent as Agent
 
 
 
