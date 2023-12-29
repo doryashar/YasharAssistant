@@ -35,7 +35,7 @@ class BaseAgent:
         self.prompt = '{history}\n{user_name}:{message}'
         self.model = self.get_model(self.MODEL_NAME, async_get=False)
         self.commands_functions = {
-            'reset_history': self.reset_history
+            'reset_history': self.reset_history,
             'toggle' : self.toggle,
         }
         # self.stop = '</s>'
