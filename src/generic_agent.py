@@ -98,34 +98,38 @@ class BaseAgent:
         return 'History reset', None
             
     async def chat(self, user_id: str, text: str, use_history=True, finish_callbacks=[], *args, **kwargs) -> str:
-        if text[0] == '!':
-            command = text.split()[0][1:]
-            if command in self.commands_functions:
-                func = self.commands_functions[command]
-                res = await func(user_id, text, use_history, finish_callbacks, *args, **kwargs)
-                return res
-            else:
-                return 'Unknown command', None
-        
-        user = self.get_user(user_id)
-        user_name = user.get('user_name', '{USER}')
-        
-        
-        if use_history:
-            history = self.get_history(user_id)
-        else:
-            history = ''
+        try:
+            if text[0] == '!':
+                command = text.split()[0][1:]
+                if command in self.commands_functions:
+                    func = self.commands_functions[command]
+                    res = await func(user_id, text, use_history, finish_callbacks, *args, **kwargs)
+                    return res
+                else:
+                    return 'Unknown command', None
             
-        message = self.preprocess_text(user, text)
-        prompt = self.prompt.format(message=message, user_name=user_name, history=history)
-        response = await self.process_text(prompt, *args, **kwargs)
-        
-        self.update_history(user_id, prompt, response, user_name)
-        response, args, kwargs = self.postprocess_text(user, prompt, response, *args, **kwargs)
-        
-        for finish_callback in finish_callbacks:
-            args, kwargs = finish_callback(prompt=prompt, response=response, *args, **kwargs)
-        return response, None
+            user = self.get_user(user_id)
+            user_name = user.get('user_name', '{USER}')
+            
+            
+            if use_history:
+                history = self.get_history(user_id)
+            else:
+                history = ''
+                
+            message = self.preprocess_text(user, text)
+            prompt = self.prompt.format(message=message, user_name=user_name, history=history)
+            response = await self.process_text(prompt, *args, **kwargs)
+            
+            self.update_history(user_id, prompt, response, user_name)
+            response, args, kwargs = self.postprocess_text(user, prompt, response, *args, **kwargs)
+            
+            for finish_callback in finish_callbacks:
+                args, kwargs = finish_callback(prompt=prompt, response=response, *args, **kwargs)
+            return response, None
+        except Exception as exp:
+            logger.exception(exp)
+            return None, None #f'Error: {exp}'
             
     async def process_text(self, text: str) -> str:
         t1 = time.time()
