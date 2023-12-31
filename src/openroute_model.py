@@ -12,7 +12,7 @@ from src.generic_agent import TranslatableAgent
 
 dotenv.load_dotenv()
 model_to_load = os.getenv("OPENROUTE_MODEL", "mistralai/mistral-7b-instruct")  # Optional
-completion_url = "https://openrouter.ai/api/v1/chat/completions"
+completion_url = "https://hooks.cap.yashar.us/0h83sez" #https://openrouter.ai/api/v1/chat/completions"
 headers={
     "HTTP-Referer": os.getenv("YOUR_APP_URL", "TEST"), # Optional, for including your app on openrouter.ai rankings. 
     "X-Title": os.getenv("YOUR_APP_NAME", "TEST"), # Optional. Shows in rankings on openrouter.ai.
@@ -26,6 +26,7 @@ class OpenRouteAgent(TranslatableAgent):
         super().__init__(agent_name)
         self.http_post_func = functools.partial(requests.post, headers=headers, timeout=10)
         self.prompt = '{history}\n{message}'
+        
     async def process_text(self, text: str, use_async=True) -> str:
         """
         Asynchronously handles a message.
