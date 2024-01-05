@@ -11,7 +11,7 @@ import logging
 from src.generic_agent import TranslatableAgent
 
 dotenv.load_dotenv()
-model_to_load = os.getenv("OPENROUTE_MODEL", "mistralai/mistral-7b-instruct")  # Optional
+model_to_load = os.getenv("OPENROUTE_MODEL", "openai/gpt-4-1106-preview") #"mistralai/mistral-7b-instruct")  # Optional
 completion_url = "https://hooks.cap.yashar.us/0h83sez" #https://openrouter.ai/api/v1/chat/completions"
 headers={
     "HTTP-Referer": os.getenv("YOUR_APP_URL", "TEST"), # Optional, for including your app on openrouter.ai rankings. 

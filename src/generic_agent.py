@@ -153,7 +153,7 @@ from googletrans import Translator
 class TranslatableAgent(BaseAgent):
     def __init__(self, agent_name = '{ASSISTANT}') -> None:
         super().__init__(agent_name)
-        self.translate_enabled = True
+        self.translate_enabled = False
         self.translator = Translator()
 
     def preprocess_text(self, user, text):
